@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Financial Data Processor</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Added integrity checks and security headers for SafeSurf compatibility -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com;">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Load encryption.js BEFORE app.js to prevent placeholder overrides -->
+    <script src="encryption.js" defer></script>
+    <script src="app.js" defer></script>
 </head>
 <body>
     <!-- Password Protection Screen -->
@@ -20,8 +25,8 @@
                 All files are processed locally and never leave your device
             </p>
             <div class="password-input-group">
-                <input type="password" id="passwordInput" placeholder="Enter password" />
-                <button onclick="verifyPassword()">Unlock</button>
+                <input type="password" id="passwordInput" placeholder="Enter password" autocomplete="off" />
+                <button onclick="verifyPassword()" type="button">Unlock</button>
             </div>
             <p class="error-message" id="passwordError"></p>
             <div class="security-badges">
@@ -38,16 +43,16 @@
             <h1>🔒 Secure Financial Data Processor</h1>
             <div class="security-status">
                 <span class="encryption-badge">🔐 AES-256 Encrypted</span>
-                <button onclick="lockApp()" class="lock-btn">Lock App</button>
+                <button onclick="lockApp()" class="lock-btn" type="button">Lock App</button>
             </div>
         </header>
 
         <div class="container">
             <!-- Tab Navigation -->
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('excel-combiner')">Excel Combiner</button>
-                <button class="tab-btn" onclick="switchTab('pdf-extractor')">PDF Extractor</button>
-                <button class="tab-btn" onclick="switchTab('reason-matcher')">Reason Matcher</button>
+                <button class="tab-btn active" onclick="switchTab('excel-combiner')" type="button">Excel Combiner</button>
+                <button class="tab-btn" onclick="switchTab('pdf-extractor')" type="button">PDF Extractor</button>
+                <button class="tab-btn" onclick="switchTab('reason-matcher')" type="button">Reason Matcher</button>
             </div>
 
             <!-- Excel Combiner Tab -->
@@ -60,21 +65,23 @@
                 <div class="file-selection">
                     <div class="file-input-group">
                         <label>Excel File 1 (Total Liabilities):</label>
-                        <input type="file" id="liabilityFile" accept=".xlsx,.xls" onchange="handleLiabilityFile(event)" />
+                        <!-- Enhanced file input for SafeSurf compatibility with explicit MIME types -->
+                        <input type="file" id="liabilityFile" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" onchange="handleLiabilityFile(event)" capture="user" />
                         <span class="file-name" id="liabilityFileName">No file selected</span>
                     </div>
 
                     <div class="file-input-group">
                         <label>Excel File 2 (Reason of Recoveries):</label>
-                        <input type="file" id="recoveryFile" accept=".xlsx,.xls" onchange="handleRecoveryFile(event)" />
+                        <!-- Enhanced file input for SafeSurf compatibility -->
+                        <input type="file" id="recoveryFile" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" onchange="handleRecoveryFile(event)" capture="user" />
                         <span class="file-name" id="recoveryFileName">No file selected</span>
                     </div>
                 </div>
 
                 <div class="action-buttons">
-                    <button onclick="processExcelFiles()" id="processExcelBtn" disabled>Process Files</button>
-                    <button onclick="clearExcelCombiner()" class="secondary">Clear All</button>
-                    <button onclick="showHelp('excel')" class="help">Help</button>
+                    <button onclick="processExcelFiles()" id="processExcelBtn" disabled type="button">Process Files</button>
+                    <button onclick="clearExcelCombiner()" class="secondary" type="button">Clear All</button>
+                    <button onclick="showHelp('excel')" class="help" type="button">Help</button>
                 </div>
 
                 <div class="progress-bar" id="excelProgress" style="display: none;">
@@ -104,14 +111,15 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button onclick="document.getElementById('pdfFilesInput').click()">Add PDF Files</button>
-                    <input type="file" id="pdfFilesInput" accept=".pdf" multiple onchange="handlePdfFiles(event)" style="display: none;" />
-                    <button onclick="removeSelectedPdfs()" class="secondary">Remove Selected</button>
-                    <button onclick="clearPdfExtractor()" class="secondary">Clear All</button>
+                    <button onclick="document.getElementById('pdfFilesInput').click()" type="button">Add PDF Files</button>
+                    <!-- Enhanced file input for SafeSurf compatibility with explicit PDF MIME types -->
+                    <input type="file" id="pdfFilesInput" accept=".pdf,application/pdf" multiple onchange="handlePdfFiles(event)" style="display: none;" capture="user" />
+                    <button onclick="removeSelectedPdfs()" class="secondary" type="button">Remove Selected</button>
+                    <button onclick="clearPdfExtractor()" class="secondary" type="button">Clear All</button>
                 </div>
 
                 <div class="action-buttons">
-                    <button onclick="extractPdfData()" id="extractPdfBtn" class="primary" disabled>Extract Data & Generate Excel</button>
+                    <button onclick="extractPdfData()" id="extractPdfBtn" class="primary" disabled type="button">Extract Data & Generate Excel</button>
                 </div>
 
                 <div class="progress-bar" id="pdfProgress" style="display: none;">
@@ -131,20 +139,22 @@
                 <div class="file-selection">
                     <div class="file-input-group">
                         <label>File 1 (Excel Combiner Output):</label>
-                        <input type="file" id="matcherFile1" accept=".xlsx,.xls" onchange="handleMatcherFile1(event)" />
+                        <!-- Enhanced file input for SafeSurf compatibility -->
+                        <input type="file" id="matcherFile1" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" onchange="handleMatcherFile1(event)" capture="user" />
                         <span class="file-name" id="matcherFile1Name">No file selected</span>
                     </div>
 
                     <div class="file-input-group">
                         <label>File 2 (PDF Extractor Output):</label>
-                        <input type="file" id="matcherFile2" accept=".xlsx,.xls" onchange="handleMatcherFile2(event)" />
+                        <!-- Enhanced file input for SafeSurf compatibility -->
+                        <input type="file" id="matcherFile2" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" onchange="handleMatcherFile2(event)" capture="user" />
                         <span class="file-name" id="matcherFile2Name">No file selected</span>
                     </div>
                 </div>
 
                 <div class="action-buttons">
-                    <button onclick="matchReasons()" id="matchReasonsBtn" disabled>Match Reasons</button>
-                    <button onclick="clearReasonMatcher()" class="secondary">Clear All</button>
+                    <button onclick="matchReasons()" id="matchReasonsBtn" disabled type="button">Match Reasons</button>
+                    <button onclick="clearReasonMatcher()" class="secondary" type="button">Clear All</button>
                 </div>
 
                 <div class="progress-bar" id="matcherProgress" style="display: none;">
@@ -160,8 +170,5 @@
             </div>
         </div>
     </div>
-
-    <script src="encryption.js"></script>
-    <script src="app.js"></script>
 </body>
 </html>

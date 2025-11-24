@@ -9,7 +9,7 @@ const SecureEncryption = {
       const encrypted = window.CryptoJS.AES.encrypt(data, password)
       return encrypted.toString()
     } catch (error) {
-      console.error("Encryption error:", error)
+      console.error("[v0] Encryption error:", error)
       throw new Error("Failed to encrypt data")
     }
   },
@@ -20,7 +20,7 @@ const SecureEncryption = {
       const decrypted = window.CryptoJS.AES.decrypt(encryptedData, password)
       return decrypted.toString(window.CryptoJS.enc.Utf8)
     } catch (error) {
-      console.error("Decryption error:", error)
+      console.error("[v0] Decryption error:", error)
       throw new Error("Failed to decrypt data")
     }
   },
@@ -42,7 +42,10 @@ const SecureEncryption = {
 
   // Verify password
   verifyPassword(inputPassword) {
-    return inputPassword === this.APP_PASSWORD
+    console.log("[v0] Verifying password...")
+    const isValid = inputPassword === this.APP_PASSWORD
+    console.log("[v0] Password verification result:", isValid)
+    return isValid
   },
 
   // Secure file reading with encryption
@@ -111,15 +114,19 @@ const SecureSession = {
   sessionKey: null,
 
   authenticate(password) {
+    console.log("[v0] Attempting authentication...")
     if (SecureEncryption.verifyPassword(password)) {
       this.isAuthenticated = true
       this.sessionKey = SecureEncryption.hashPassword(password + Date.now())
+      console.log("[v0] Authentication successful")
       return true
     }
+    console.log("[v0] Authentication failed")
     return false
   },
 
   lock() {
+    console.log("[v0] Locking session...")
     this.isAuthenticated = false
     this.sessionKey = null
   },
@@ -128,3 +135,5 @@ const SecureSession = {
     return this.isAuthenticated
   },
 }
+
+console.log("[v0] SecureEncryption and SecureSession modules loaded")
