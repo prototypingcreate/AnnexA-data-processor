@@ -9,9 +9,9 @@ const AppState = {
   extractedPdfData: [],
 }
 
-// Declare SecureSession and SecureEncryption variables
-const SecureSession = {} // Placeholder for SecureSession
-const SecureEncryption = {} // Placeholder for SecureEncryption
+// These are now properly loaded from encryption.js
+const SecureSession = window.SecureSession
+const SecureEncryption = window.SecureEncryption
 
 const XLSX = {
   utils: {
@@ -34,15 +34,21 @@ const XLSX = {
 
 // Password verification
 function verifyPassword() {
+  console.log("[v0] verifyPassword() called")
   const input = document.getElementById("passwordInput")
   const errorMsg = document.getElementById("passwordError")
 
+  console.log("[v0] Input value:", input.value)
+  console.log("[v0] SecureEncryption available:", typeof SecureEncryption)
+
   if (SecureEncryption.verifyPassword(input.value)) {
+    console.log("[v0] Password verified successfully")
     document.getElementById("passwordScreen").style.display = "none"
     document.getElementById("mainApp").style.display = "block"
     log("excelLog", "🔒 Application unlocked - All files will be encrypted")
     log("excelLog", "System ready for secure processing")
   } else {
+    console.log("[v0] Password verification failed")
     errorMsg.textContent = "❌ Incorrect password. Please try again."
     input.value = ""
     setTimeout(() => (errorMsg.textContent = ""), 3000)
