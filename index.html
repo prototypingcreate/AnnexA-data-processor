@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Financial Data Processor</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+    <!-- Password Protection Screen -->
+    <div id="passwordScreen" class="password-screen">
+        <div class="password-container">
+            <div class="lock-icon">🔒</div>
+            <h1>Secure Financial Data Processor</h1>
+            <p class="security-notice">
+                🛡️ This application uses end-to-end AES-256 encryption<br>
+                All files are processed locally and never leave your device
+            </p>
+            <div class="password-input-group">
+                <input type="password" id="passwordInput" placeholder="Enter password" />
+                <button onclick="verifyPassword()">Unlock</button>
+            </div>
+            <p class="error-message" id="passwordError"></p>
+            <div class="security-badges">
+                <span class="badge">🔐 End-to-End Encrypted</span>
+                <span class="badge">🖥️ Client-Side Only</span>
+                <span class="badge">🔒 Zero Server Upload</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app" style="display: none;">
+        <header class="app-header">
+            <h1>🔒 Secure Financial Data Processor</h1>
+            <div class="security-status">
+                <span class="encryption-badge">🔐 AES-256 Encrypted</span>
+                <button onclick="lockApp()" class="lock-btn">Lock App</button>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('excel-combiner')">Excel Combiner</button>
+                <button class="tab-btn" onclick="switchTab('pdf-extractor')">PDF Extractor</button>
+                <button class="tab-btn" onclick="switchTab('reason-matcher')">Reason Matcher</button>
+            </div>
+
+            <!-- Excel Combiner Tab -->
+            <div id="excel-combiner" class="tab-content active">
+                <div class="tab-header">
+                    <h2>Excel File Combiner</h2>
+                    <p class="description">Combine Total Liabilities & Reason of Recovery Excel files with automatic processing rules</p>
+                </div>
+
+                <div class="file-selection">
+                    <div class="file-input-group">
+                        <label>Excel File 1 (Total Liabilities):</label>
+                        <input type="file" id="liabilityFile" accept=".xlsx,.xls" onchange="handleLiabilityFile(event)" />
+                        <span class="file-name" id="liabilityFileName">No file selected</span>
+                    </div>
+
+                    <div class="file-input-group">
+                        <label>Excel File 2 (Reason of Recoveries):</label>
+                        <input type="file" id="recoveryFile" accept=".xlsx,.xls" onchange="handleRecoveryFile(event)" />
+                        <span class="file-name" id="recoveryFileName">No file selected</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="processExcelFiles()" id="processExcelBtn" disabled>Process Files</button>
+                    <button onclick="clearExcelCombiner()" class="secondary">Clear All</button>
+                    <button onclick="showHelp('excel')" class="help">Help</button>
+                </div>
+
+                <div class="progress-bar" id="excelProgress" style="display: none;">
+                    <div class="progress-fill"></div>
+                </div>
+
+                <div class="log-container">
+                    <h3>Processing Log</h3>
+                    <div class="log-output" id="excelLog"></div>
+                </div>
+
+                <div class="status-bar" id="excelStatus">Ready to process files...</div>
+            </div>
+
+            <!-- PDF Extractor Tab -->
+            <div id="pdf-extractor" class="tab-content">
+                <div class="tab-header">
+                    <h2>PDF Financial Liabilities Extractor</h2>
+                    <p class="description">Extract financial liability data from PDF files and generate Excel output</p>
+                </div>
+
+                <div class="file-list-container">
+                    <h3>Selected PDF Files</h3>
+                    <div class="file-list" id="pdfFileList">
+                        <p class="empty-state">No PDF files selected</p>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="document.getElementById('pdfFilesInput').click()">Add PDF Files</button>
+                    <input type="file" id="pdfFilesInput" accept=".pdf" multiple onchange="handlePdfFiles(event)" style="display: none;" />
+                    <button onclick="removeSelectedPdfs()" class="secondary">Remove Selected</button>
+                    <button onclick="clearPdfExtractor()" class="secondary">Clear All</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="extractPdfData()" id="extractPdfBtn" class="primary" disabled>Extract Data & Generate Excel</button>
+                </div>
+
+                <div class="progress-bar" id="pdfProgress" style="display: none;">
+                    <div class="progress-fill"></div>
+                </div>
+
+                <div class="status-bar" id="pdfStatus">Ready to extract PDF data</div>
+            </div>
+
+            <!-- Reason Matcher Tab -->
+            <div id="reason-matcher" class="tab-content">
+                <div class="tab-header">
+                    <h2>Reason Matcher</h2>
+                    <p class="description">Match 'Reason for Action' with 'Reason for Recoveries' by Personnel Number</p>
+                </div>
+
+                <div class="file-selection">
+                    <div class="file-input-group">
+                        <label>File 1 (Excel Combiner Output):</label>
+                        <input type="file" id="matcherFile1" accept=".xlsx,.xls" onchange="handleMatcherFile1(event)" />
+                        <span class="file-name" id="matcherFile1Name">No file selected</span>
+                    </div>
+
+                    <div class="file-input-group">
+                        <label>File 2 (PDF Extractor Output):</label>
+                        <input type="file" id="matcherFile2" accept=".xlsx,.xls" onchange="handleMatcherFile2(event)" />
+                        <span class="file-name" id="matcherFile2Name">No file selected</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button onclick="matchReasons()" id="matchReasonsBtn" disabled>Match Reasons</button>
+                    <button onclick="clearReasonMatcher()" class="secondary">Clear All</button>
+                </div>
+
+                <div class="progress-bar" id="matcherProgress" style="display: none;">
+                    <div class="progress-fill"></div>
+                </div>
+
+                <div class="log-container">
+                    <h3>Processing Log</h3>
+                    <div class="log-output" id="matcherLog"></div>
+                </div>
+
+                <div class="status-bar" id="matcherStatus">Ready to match reasons...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="encryption.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
